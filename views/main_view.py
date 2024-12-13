@@ -213,8 +213,13 @@ class MainView(tk.Tk):
                 # Update label
                 self.employee_photo_label.configure(image=photo)
                 self.employee_photo_label.image = photo
+                
+                # Ajouter un label pour afficher le nom et prénom sous la photo
+                employee_name = f"{self.controller.current_employee['first_name']} {self.controller.current_employee['last_name']}"
+                ttk.Label(self.photo_frame, text=employee_name, style="TLabel").pack()
             except Exception as e:
                 print(f"Error loading employee photo: {e}")
+
 
     def show_main_screen(self):
         """Return to the main screen and save equipment changes"""
