@@ -139,6 +139,10 @@ class MainView(tk.Tk):
             widget.destroy()
         self.equipment_checkboxes.clear()
 
+        # Clear existing labels in the photo frame (including name labels)
+        for widget in self.photo_frame.winfo_children():
+            widget.destroy()
+
         # Equipment list
         equipment_list = self.controller.get_equipment_list()
         assigned_equipment = self.controller.get_employee_equipment()
@@ -181,17 +185,25 @@ class MainView(tk.Tk):
         # Equipment checkboxes
         for equipment in equipment_list:
             var = tk.BooleanVar(value=equipment['id_equipment'] in assigned_ids)
+            
+            # Ajouter la vérification et désactiver si la valeur est <= 0
+            if equipment['quantity_equipment'] <= 0:  # Vérifier la quantité dans la base de données
+                state = 'disabled'
+            else:
+                state = 'normal'
+            
             cb = ttk.Checkbutton(
                 scrollable_frame,
                 text=equipment['equipment_name'],
                 variable=var,
                 style="Custom.TCheckbutton",
-                command=lambda e=equipment, v=var: self.on_equipment_toggle(e, v)
+                command=lambda e=equipment, v=var: self.on_equipment_toggle(e, v),
+                state=state  # Désactiver la checkbox si la condition est remplie
             )
             cb.pack(anchor="w", pady=5)
             self.equipment_checkboxes[equipment['id_equipment']] = var
 
-        # Load and display employee photo
+        # Load and display employee photo and name
         if self.controller.current_employee and self.controller.current_employee['photo_url']:
             try:
                 # Construire le chemin absolu vers la photo
@@ -210,15 +222,18 @@ class MainView(tk.Tk):
                 # Convert to PhotoImage
                 photo = ImageTk.PhotoImage(image)
                 
-                # Update label
-                self.employee_photo_label.configure(image=photo)
+                # Créer et afficher l'image
+                self.employee_photo_label = ttk.Label(self.photo_frame, image=photo)
                 self.employee_photo_label.image = photo
+                self.employee_photo_label.pack()
                 
                 # Ajouter un label pour afficher le nom et prénom sous la photo
                 employee_name = f"{self.controller.current_employee['first_name']} {self.controller.current_employee['last_name']}"
-                ttk.Label(self.photo_frame, text=employee_name, style="TLabel").pack()
+                self.employee_name_label = ttk.Label(self.photo_frame, text=employee_name, style="TLabel")
+                self.employee_name_label.pack()
             except Exception as e:
                 print(f"Error loading employee photo: {e}")
+
 
 
     def show_main_screen(self):
@@ -227,6 +242,7 @@ class MainView(tk.Tk):
         final_equipment_state = {id_equipment: var.get() 
                                for id_equipment, var in self.equipment_checkboxes.items()}
         
+
         # Sauvegarder les changements via le contrôleur
         self.controller.save_equipment_changes(final_equipment_state)
         

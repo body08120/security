@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : jeu. 12 déc. 2024 à 13:19
+-- Généré le : ven. 13 déc. 2024 à 14:43
 -- Version du serveur : 8.0.31
 -- Version de PHP : 8.2.0
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Base de données : `security_db`
 --
+CREATE DATABASE IF NOT EXISTS `security_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE `security_db`;
 
 -- --------------------------------------------------------
 
@@ -32,23 +34,18 @@ CREATE TABLE IF NOT EXISTS `employee` (
   `id_employee` int NOT NULL AUTO_INCREMENT,
   `last_name` varchar(50) NOT NULL,
   `first_name` varchar(50) NOT NULL,
-  `photo_url` varchar(255) DEFAULT NULL,
-  `date_birth` date DEFAULT NULL,
-  `phone_number` varchar(15) DEFAULT NULL,
-  `email` varchar(100) NOT NULL,
-  `address` varchar(255) DEFAULT NULL,
-  `date_hire` date NOT NULL,
-  `id_role` int NOT NULL,
-  PRIMARY KEY (`id_employee`),
-  KEY `id_role` (`id_role`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `photo_url` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id_employee`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `employee`
 --
 
-INSERT INTO `employee` (`id_employee`, `last_name`, `first_name`, `photo_url`, `date_birth`, `phone_number`, `email`, `address`, `date_hire`, `id_role`) VALUES
-(1, 'ren', 'nat', 'faces/1.jpg', '0000-00-00', '0613548658', 'nfugsduf@gmail.com', '7 rue mgl du biz', '0000-00-00', 1);
+INSERT INTO `employee` (`id_employee`, `last_name`, `first_name`, `photo_url`) VALUES
+(1, '', 'Nataël', 'faces/1.jpg'),
+(2, '', 'Steeve', 'faces/2.jpg'),
+(3, '', 'Ben', 'faces/3.jpg');
 
 -- --------------------------------------------------------
 
@@ -95,29 +92,8 @@ CREATE TABLE IF NOT EXISTS `have` (
   `id_equipment` int NOT NULL,
   `id_employee` int NOT NULL,
   PRIMARY KEY (`id_equipment`,`id_employee`),
-  KEY `id_employee` (`id_employee`)
+  KEY `id_agent` (`id_employee`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `role`
---
-
-DROP TABLE IF EXISTS `role`;
-CREATE TABLE IF NOT EXISTS `role` (
-  `id_role` int NOT NULL AUTO_INCREMENT,
-  `type_role` varchar(50) NOT NULL,
-  PRIMARY KEY (`id_role`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Déchargement des données de la table `role`
---
-
-INSERT INTO `role` (`id_role`, `type_role`) VALUES
-(1, 'administrator'),
-(2, 'security_agent');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
