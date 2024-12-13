@@ -11,10 +11,12 @@ class MainView(tk.Tk):
         super().__init__()
 
         self.title("Système de Contrôle d'Accès")
-        self.configure(bg="#FFFFFF")
+        self.configure(bg="#F2F2F2")
         
-        # Configuration en plein écran
-        self.state('zoomed')
+        # Configuration écran
+        # self.state('zoomed')
+        self.geometry("800x480")
+        self.resizable(False, False) # Désactiver le redimensionnement
         
         # Style configuration
         self.style = ttk.Style()
@@ -22,31 +24,31 @@ class MainView(tk.Tk):
         # Style des cases à cocher
         self.style.configure(
             "Custom.TCheckbutton",
-            background="#FFFFFF",
-            foreground="#000000",
+            background="#F2F2F2",
+            foreground="#020202",
             font=("Roboto", 11)
         )
         
         # Style des titres
         self.style.configure(
             "Title.TLabel",
-            background="#FFFFFF",
+            background="#F2F2F2",
             foreground="#379EC1",
-            font=("Roboto", 16, "bold")
+            font=("Roboto", 14, "bold")
         )
         
         # Style des labels normaux
         self.style.configure(
             "TLabel",
-            background="#FFFFFF",
-            foreground="#000000",
+            background="#F2F2F2",
+            foreground="#020202",
             font=("Roboto", 11)
         )
         
         # Style des frames
         self.style.configure(
             "TFrame",
-            background="#FFFFFF"
+            background="#F2F2F2"
         )
 
         # Main container
@@ -67,8 +69,8 @@ class MainView(tk.Tk):
         # Style personnalisé pour les boutons
         button_style = {
             'bg': '#379EC1',
-            'fg': '#FFFFFF',
-            'font': ('Roboto', 12, 'bold'),
+            'fg': '#F2F2F2',
+            'font': ('Roboto', 11, 'bold'),
             'relief': 'flat',
             'padx': 20,
             'pady': 10,
@@ -92,12 +94,12 @@ class MainView(tk.Tk):
         self.equipment_checkboxes = {}
         
         # Configure equipment frame layout
-        self.equipment_frame.columnconfigure(1, weight=1)  # Middle column expands
+        self.equipment_frame.columnconfigure(2, weight=2)  # Middle column expands
         
         # Back button (left)
         self.back_button = tk.Button(
             self.equipment_frame,
-            text="Validation",
+            text="Retour",
             command=self.show_main_screen,
             **button_style
         )
@@ -120,7 +122,8 @@ class MainView(tk.Tk):
 
     def update_camera_feed(self, frame):
         """Update the camera feed display"""
-        frame = cv2.resize(frame, (640, 480))
+        # Ajuster la taille du cadre de la caméra
+        frame = cv2.resize(frame, (640, 470))  # Ajuster la hauteur à 470 pixels
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         photo = ImageTk.PhotoImage(image=Image.fromarray(frame))
         self.camera_label.configure(image=photo)
@@ -130,7 +133,7 @@ class MainView(tk.Tk):
         """Show the equipment management screen"""
         self.main_container.pack_forget()
         self.equipment_frame.pack(fill=tk.BOTH, expand=True)
-        
+
         # Clear existing checkboxes
         for widget in self.equipment_list_frame.winfo_children():
             widget.destroy()
@@ -141,9 +144,36 @@ class MainView(tk.Tk):
         assigned_equipment = self.controller.get_employee_equipment()
         assigned_ids = [eq['id_equipment'] for eq in assigned_equipment]
 
+        # Create a Canvas widget and a Scrollbar
+        canvas = tk.Canvas(self.equipment_list_frame, bg="#F2F2F2", height=450)  # Set height to 450 pixels
+        scrollbar = ttk.Scrollbar(self.equipment_list_frame, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Create a frame to hold the checkboxes inside the canvas
+        scrollable_frame = ttk.Frame(canvas, style="TFrame")
+
+        # Add the scrollable frame to the canvas
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+        # Configure the scroll region
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        # Use grid to place the canvas and scrollbar
+        canvas.grid(row=0, column=0, sticky="nsew")
+        scrollbar.grid(row=0, column=1, sticky="ns")
+
+        # Ensure the main container uses grid layout to fill entire window
+        self.equipment_list_frame.grid_columnconfigure(0, weight=1)
+        self.equipment_list_frame.grid_rowconfigure(0, weight=1)
+
         # Title for equipment list
         ttk.Label(
-            self.equipment_list_frame,
+            scrollable_frame,
             text="Gestion du Matériel",
             style="Title.TLabel"
         ).pack(anchor="w", pady=(0, 20))
@@ -152,7 +182,7 @@ class MainView(tk.Tk):
         for equipment in equipment_list:
             var = tk.BooleanVar(value=equipment['id_equipment'] in assigned_ids)
             cb = ttk.Checkbutton(
-                self.equipment_list_frame,
+                scrollable_frame,
                 text=equipment['equipment_name'],
                 variable=var,
                 style="Custom.TCheckbutton",
@@ -183,8 +213,13 @@ class MainView(tk.Tk):
                 # Update label
                 self.employee_photo_label.configure(image=photo)
                 self.employee_photo_label.image = photo
+                
+                # Ajouter un label pour afficher le nom et prénom sous la photo
+                employee_name = f"{self.controller.current_employee['first_name']} {self.controller.current_employee['last_name']}"
+                ttk.Label(self.photo_frame, text=employee_name, style="TLabel").pack()
             except Exception as e:
                 print(f"Error loading employee photo: {e}")
+
 
     def show_main_screen(self):
         """Return to the main screen and save equipment changes"""
