@@ -1,8 +1,6 @@
 # Importation des bibliothèques nécessaires pour la connexion à la base de données MySQL et la gestion des données
 import mysql.connector  # Importation de la bibliothèque pour se connecter à MySQL
 from mysql.connector import Error  # Importation des erreurs spécifiques à MySQL
-import os  # Importation pour interagir avec le système d'exploitation
-from datetime import datetime  # Importation pour gérer les dates et heures
 
 # Définition de la classe DatabaseModel pour interagir avec la base de données
 class DatabaseModel:
@@ -39,9 +37,9 @@ class DatabaseModel:
         """Obtenir l'équipement assigné à un employé"""
         try:
             cursor = self.connection.cursor(dictionary=True)  # Créer un curseur pour exécuter des requêtes
-            query = """SELECT e.* FROM equipment e 
-                      JOIN have h ON e.id_equipment = h.id_equipment 
-                      WHERE h.id_employee = %s"""  # Requête pour obtenir l'équipement de l'employé
+            query = ("SELECT e.* FROM equipment e "
+                     "JOIN have h ON e.id_equipment = h.id_equipment "
+                     "WHERE h.id_employee = %s")  # Requête pour obtenir l'équipement de l'employé
             cursor.execute(query, (employee_id,))  # Exécuter la requête avec l'ID de l'employé
             result = cursor.fetchall()  # Récupérer tous les résultats
             cursor.close()  # Fermer le curseur
