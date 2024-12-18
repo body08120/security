@@ -1,10 +1,8 @@
 """Contrôleur principal de l'application."""
 from models.database import DatabaseModel
 from models.face_recognition_model import FaceRecognitionModel
-import cv2
 import os
 import urllib.request
-from pathlib import Path
 
 
 class MainController:
@@ -16,11 +14,11 @@ class MainController:
         self.db_model = DatabaseModel()
         self.face_model = FaceRecognitionModel()
         self.current_employee = None
-        
+
         # Créer le répertoire des visages s'il n'existe pas
         self.faces_dir = os.path.join(os.path.dirname(__file__), '..', 'faces')
         os.makedirs(self.faces_dir, exist_ok=True)
-        
+
         # Charger les visages des employés
         self.load_employee_faces()
 
@@ -32,7 +30,7 @@ class MainController:
         for emp in employees:
             print(f"ID: {emp['id_employee']}, "
                   f"Name: {emp['first_name']} {emp['last_name']}")
-        
+
         for employee in employees:
             if employee['photo_url']:
                 try:
@@ -40,12 +38,12 @@ class MainController:
                     photo_path = os.path.join(self.faces_dir, photo_filename)
                     print(f"Processing employee {employee['id_employee']}, "
                           f"photo path: {photo_path}")
-                    
+
                     if not os.path.exists(photo_path):
                         print(f"Downloading photo for employee "
                               f"{employee['id_employee']}")
                         urllib.request.urlretrieve(employee['photo_url'],
-                                                 photo_path)
+                                                   photo_path)
                         print(f"Photo downloaded successfully to {photo_path}")
                     else:
                         print(f"Photo already exists at {photo_path}")
@@ -54,7 +52,7 @@ class MainController:
                           f"{employee['id_employee']}: {e}")
             else:
                 print(f"No photo URL for employee {employee['id_employee']}")
-        
+
         if os.path.exists(self.faces_dir):
             print(f"\nFiles in faces directory: {os.listdir(self.faces_dir)}")
             print(f"Loading faces from directory: {self.faces_dir}")
@@ -82,12 +80,12 @@ class MainController:
             frame = self.face_model.capture_frame()
             employee_id = self.face_model.identify_face(frame)
             print(f"Face recognition result: {employee_id}")
-            
+
             if employee_id:
                 print("Face recognized, verifying with database...")
                 employee_data = self.db_model.verify_employee(employee_id)
                 print(f"Database verification result: {employee_data}")
-                
+
                 if employee_data:
                     print("Employee verified successfully!")
                     self.current_employee = employee_data
@@ -97,7 +95,7 @@ class MainController:
                     print("Employee not found in database")
             else:
                 print("Face not recognized")
-            
+
             self.view.show_access_denied()
         except Exception as e:
             print(f"Error during face capture and verification: {e}")
@@ -144,10 +142,10 @@ class MainController:
         """Sauvegarde les changements d'équipement dans la base de données."""
         if not self.current_employee:
             return
-            
+
         current_equipment = self.get_employee_equipment()
         current_equipment_ids = {eq['id_equipment'] for eq in current_equipment}
-        
+
         for equipment_id, is_checked in final_equipment_state.items():
             if is_checked and equipment_id not in current_equipment_ids:
                 self.assign_equipment(equipment_id)
