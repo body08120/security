@@ -14,7 +14,8 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
           MYSQL_DATABASE: security_db
         ports:
           - 3306:3306
@@ -43,7 +44,7 @@ jobs:
     - name: Initialize Database Schema
       run: |
         sudo apt-get install -y mysql-client
-        mysql -h localhost -u root -proot security_db << 'EOF'
+        mysql -h 127.0.0.1 -P 3306 -u root security_db << 'EOF'
         CREATE TABLE IF NOT EXISTS employee (
           id_employee INT NOT NULL AUTO_INCREMENT,
           last_name VARCHAR(50) NOT NULL,
@@ -80,9 +81,9 @@ jobs:
       run: |
         python -m pytest test_database_model.py -v
       env:
-        DB_HOST: localhost
+        DB_HOST: 127.0.0.1
         DB_USER: root
-        DB_PASSWORD: root
+        DB_PASSWORD: ''
         DB_NAME: security_db
         
     - name: Lint with flake8
