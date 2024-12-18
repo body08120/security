@@ -97,6 +97,7 @@ class MainController:
                 print("Face not recognized")
 
             self.view.show_access_denied()
+            return False
         except Exception as e:
             print(f"Error during face capture and verification: {e}")
             self.view.show_access_denied()
