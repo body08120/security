@@ -40,13 +40,49 @@ jobs:
         pip install -r requirements.txt
         pip install pytest
         
+    - name: Initialize Database Schema
+      run: |
+        sudo apt-get install -y mysql-client
+        mysql -h localhost -u root -proot security_db << 'EOF'
+        CREATE TABLE IF NOT EXISTS employee (
+          id_employee INT NOT NULL AUTO_INCREMENT,
+          last_name VARCHAR(50) NOT NULL,
+          first_name VARCHAR(50) NOT NULL,
+          photo_url VARCHAR(50),
+          PRIMARY KEY (id_employee)
+        );
+        
+        CREATE TABLE IF NOT EXISTS equipment (
+          id_equipment INT NOT NULL AUTO_INCREMENT,
+          equipment_name VARCHAR(50) NOT NULL,
+          quantity_equipment INT,
+          PRIMARY KEY (id_equipment)
+        );
+        
+        CREATE TABLE IF NOT EXISTS employee_equipment (
+          id_employee INT,
+          id_equipment INT,
+          FOREIGN KEY (id_employee) REFERENCES employee(id_employee),
+          FOREIGN KEY (id_equipment) REFERENCES equipment(id_equipment)
+        );
+        
+        INSERT INTO employee (id_employee, last_name, first_name, photo_url) 
+        VALUES (1, '', 'Nataël', 'faces/1.jpg');
+        
+        INSERT INTO equipment (id_equipment, equipment_name, quantity_equipment) 
+        VALUES (1, 'Mousquetons', 14);
+        
+        INSERT INTO employee_equipment (id_employee, id_equipment)
+        VALUES (1, 1);
+        EOF
+        
     - name: Run Tests
       run: |
         python -m pytest test_database_model.py -v
       env:
         DB_HOST: localhost
         DB_USER: root
-        DB_PASSWORD: 
+        DB_PASSWORD: root
         DB_NAME: security_db
         
     - name: Lint with flake8
