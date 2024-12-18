@@ -60,7 +60,7 @@ jobs:
           PRIMARY KEY (id_equipment)
         );
         
-        CREATE TABLE IF NOT EXISTS employee_equipment (
+        CREATE TABLE IF NOT EXISTS have (
           id_employee INT,
           id_equipment INT,
           FOREIGN KEY (id_employee) REFERENCES employee(id_employee),
@@ -73,7 +73,7 @@ jobs:
         INSERT INTO equipment (id_equipment, equipment_name, quantity_equipment) 
         VALUES (1, 'Mousquetons', 14);
         
-        INSERT INTO employee_equipment (id_employee, id_equipment)
+        INSERT INTO have (id_employee, id_equipment)
         VALUES (1, 1);
         EOF
         
